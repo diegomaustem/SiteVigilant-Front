@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { AuthLayout } from '../../../shared/components/Layout/AuthLayout';
 import { LoginForm } from '../components/LoginForm';
@@ -10,6 +10,15 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const toastShown = useRef(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('sessionExpired') && !toastShown.current) {
+      toastShown.current = true;
+      toast.error('Sua sessão expirou. Faça login novamente.');
+    }
+  }, []);
 
   const handleSubmit = async (data: any) => {
     setIsLoading(true);
