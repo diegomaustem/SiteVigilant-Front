@@ -1,43 +1,37 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authApi } from '../api/authApi';
-import type { LoginCredentials, RegisterData } from '../models/auth.model';
-import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { authApi } from '../api/authApi';
+import { useAuthStore } from '../../../stores/authStore';
+import type { LoginCredentials, RegisterData } from '../models/auth.model';
 
 export function useAuthMutations() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { login, logout } = useAuthStore();
 
-  // Login
-   const loginMutation = useMutation({
+  const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) => authApi.login(credentials),
     onSuccess: (response) => {
-      // 🔥 A resposta tem um data aninhado
       const { token, user } = response.data.data;
 
-      // Salva o token no localStorage
-      localStorage.setItem('token', token);
-      
-      // Salva os dados do usuário no cache do React Query
+      login(user, token);
       queryClient.setQueryData(['user'], user);
       
       toast.success('Login realizado com sucesso!');
       navigate('/dashboard');
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message 
-        || error?.response?.data?.error 
-        || error?.message 
-        || 'Erro ao fazer login';
+      const message = error?.response?.data?.message || 'Erro ao fazer login';
       toast.error(message);
     },
   });
 
-  // Registro
   const registerMutation = useMutation({
     mutationFn: (data: RegisterData) => authApi.register(data),
-    onSuccess: () => {
-      toast.success('Conta criada com sucesso! Faça login.');
+    onSuccess: (response) => {
+      const message = response.data?.message || 'Conta criada com sucesso!';
+      toast.success(message);
       navigate('/login');
     },
     onError: (error: any) => {
@@ -46,17 +40,20 @@ export function useAuthMutations() {
     },
   });
 
-  // Logout
   const logoutMutation = useMutation({
     mutationFn: () => authApi.logout(),
     onSuccess: () => {
-      localStorage.removeItem('token');
+      logout();
+
       queryClient.clear();
+
       toast.success('Logout realizado');
       navigate('/login');
     },
     onError: (error: any) => {
-        console.log(error)
+      console.log(error);
+      logout();
+      queryClient.clear();
       toast.error('Erro ao fazer logout');
     },
   });
