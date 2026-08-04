@@ -1,16 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { AuthLayout } from '../../../shared/components/Layout/AuthLayout';
 import { LoginForm } from '../components/LoginForm';
-import { authApi } from '../api/authApi';
 import { Typography, Link } from '@mui/material';
 import { toast } from 'react-hot-toast';
+import { useAuthMutations } from '../hooks/useAuthMutations';
+import type { LoginCredentials } from '../models/auth.model';
 
 export function LoginPage() {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const toastShown = useRef(false);
+  const { loginMutation } = useAuthMutations();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -20,32 +19,17 @@ export function LoginPage() {
     }
   }, []);
 
-  const handleSubmit = async (data: any) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await authApi.login(data);
-      const token = response.data?.data?.token;
-
-       if (!token) {
-        throw new Error('Token não encontrado na resposta');
-      }
-
-      localStorage.setItem('token', token);
-      toast.success('Login realizado com sucesso!');
-      navigate('/dashboard');
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Erro ao fazer login.';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubmit = (data: LoginCredentials) => {
+    loginMutation.mutate(data);
   };
 
   return (
     <AuthLayout title="Login">
-      <LoginForm onSubmit={handleSubmit} isLoading={isLoading} error={error} />
+      <LoginForm 
+        onSubmit={handleSubmit} 
+        isLoading={loginMutation.isPending} 
+        error={loginMutation.error?.message} 
+      />
       <Typography variant="body2" sx={{ mt: 2 }}>
         Não tem uma conta?{' '}
         <Link component={RouterLink} to="/register">
