@@ -11,6 +11,7 @@ export interface RegisterData {
 }
 
 export interface AuthResponse {
+  message: string;
   success: boolean;
   data: {
     user: {
