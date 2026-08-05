@@ -4,22 +4,22 @@ import {
   AppBar,
   Box,
   Toolbar,
-  Typography,
   IconButton,
   Drawer,
-  useMediaQuery,
   useTheme,
   Container,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { SidebarMenu } from '../../../shared/components/SidebarMenu';
+import { UserMenu } from '../../../shared/components/UserMenu';
+import { useAuthUser } from '../../../stores/authStore';
+import logo from '/img/logo.png';
 
 const drawerWidth = 240;
 
 export function DashboardLayout() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const user = useAuthUser();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -49,9 +49,17 @@ export function DashboardLayout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Monitor
-          </Typography>
+        
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <img 
+              src={logo} 
+              alt="Vigilant Logo"
+              style={{ height: 60, width: 'auto', marginRight: 10 }}
+            />
+        </Box>
+
+          {/* Menu usuário logado */}
+          {user && <UserMenu />}
         </Toolbar>
       </AppBar>
 
