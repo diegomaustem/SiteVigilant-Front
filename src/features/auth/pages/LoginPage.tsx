@@ -2,10 +2,11 @@ import { useEffect, useRef } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { AuthLayout } from '../../../shared/components/Layout/AuthLayout';
 import { LoginForm } from '../components/LoginForm';
-import { Typography, Link } from '@mui/material';
+import { Typography, Link , Box} from '@mui/material';
 import { toast } from 'react-hot-toast';
 import { useAuthMutations } from '../hooks/useAuthMutations';
 import type { LoginCredentials } from '../models/auth.model';
+import logo from '/img/logo.png';
 
 export function LoginPage() {
   const toastShown = useRef(false);
@@ -24,7 +25,17 @@ export function LoginPage() {
   };
 
   return (
-    <AuthLayout title="Login">
+    <AuthLayout title="">
+       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <img 
+          src={logo} 
+          alt="Vigilant Logo"
+          style={{ 
+            height: 75, 
+            width: 'auto',
+          }}
+        />
+      </Box>
       <LoginForm 
         onSubmit={handleSubmit} 
         isLoading={loginMutation.isPending} 

@@ -1,8 +1,9 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { AuthLayout } from '../../../shared/components/Layout/AuthLayout';
 import { RegisterForm } from '../components/RegisterForm';
-import { Typography, Link } from '@mui/material';
+import { Typography, Link, Box } from '@mui/material';
 import { useAuthMutations } from '../hooks/useAuthMutations';
+import logo from '/img/logo.png';
 
 export function RegisterPage() {
   const { registerMutation } = useAuthMutations();
@@ -12,7 +13,17 @@ export function RegisterPage() {
   };
   
   return (
-    <AuthLayout title="Cadastro">
+    <AuthLayout title="">
+       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <img 
+          src={logo} 
+          alt="Vigilant Logo"
+          style={{ 
+            height: 75, 
+            width: 'auto',
+          }}
+        />
+      </Box>
       <RegisterForm 
         onSubmit={handleSubmit} 
         isLoading={registerMutation.isPending} 
