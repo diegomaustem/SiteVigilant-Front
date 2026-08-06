@@ -9,6 +9,10 @@ import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { MonitorRoutes } from './features/monitors/routes';
 import { ProtectedRoute } from './shared/components/ProtectedRoute';
 import { CssBaseline } from '@mui/material';
+import { PeriodicityRoutes } from './features/periodicities/routes';
+
+import { useEffect } from 'react';
+import { useAuthStore } from './stores/authStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +24,11 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const { isAuthenticated, user } = useAuthStore();
+  
+  useEffect(() => {
+  }, [isAuthenticated, user]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
@@ -29,7 +38,7 @@ function App() {
             {/* Rotas públicas */}
             <Route path="/*" element={<AuthRoutes />} />
 
-            {/* Rotas protegidas com ProtectedRoute usando Outlet */}
+            {/* Rotas protegidas */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<DashboardLayout />}>
                 <Route index element={<DashboardPage />} />
@@ -43,8 +52,8 @@ function App() {
                 <Route path="*" element={<MonitorRoutes />} />
               </Route>
 
-              <Route path="/users/*" element={<DashboardLayout />}>
-                <Route path="*" element={<MonitorRoutes />} />
+              <Route path="/periodicities/*" element={<DashboardLayout />}>
+                <Route path="*" element={<PeriodicityRoutes />} />
               </Route>
             </Route>
           </Routes>
