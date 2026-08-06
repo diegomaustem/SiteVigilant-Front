@@ -15,22 +15,30 @@ import {
   TableRow,
   Chip,
   CircularProgress,
+  Alert
 } from '@mui/material';
-import { Add, MonitorHeart, PlayArrow, Schedule } from '@mui/icons-material';
-// import { useMonitors } from '../../monitors/hooks/useMonitors';
-import type { Monitor } from '../../monitors/models/monitor.model';
-
-import { useMonitors } from '../../monitors/hooks/useMonitors';
+import { MonitorHeart, PlayArrow, Schedule } from '@mui/icons-material';
+import { userMonitorsLog } from '../../monitor-logs/hooks/userMonitorsLog';
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { data: monitors, isLoading, error } = useMonitors();
+  const { 
+    data, 
+    isLoading, 
+    error,
+    refetch  
+  } = userMonitorsLog(1, 10, {
+    refetchInterval: 30000,
+  });
+  
+  const monitorsLog = data?.items || [];
+  const meta = data?.meta;
 
-  // Estatísticas
-  const totalMonitors = monitors?.length || 0;
-  const activeMonitors = monitors?.filter((m) => m.url?.trim()).length || 0;
-  const lastUpdated = monitors?.length
-    ? new Date(Math.max(...monitors.map((m) => new Date(m.updatedAt).getTime())))
+  const totalMonitorsLog = meta?.total || 0;
+  const logsUp = monitorsLog?.filter((log) => log.isUp === true).length || 0;
+  const logsDown = monitorsLog?.filter((log) => log.isUp === false).length || 0;
+  const lastChecked = monitorsLog?.length
+    ? new Date(Math.max(...monitorsLog.map((log) => new Date(log.checkedAt).getTime())))
     : null;
 
   if (isLoading) {
@@ -43,9 +51,17 @@ export function DashboardPage() {
 
   if (error) {
     return (
-      <Typography sx={{ color: 'error.main', textAlign: 'center', mt: 5 }}>
-        Erro ao carregar monitores. Tente novamente.
-      </Typography>
+      <Alert 
+        severity="error" 
+        sx={{ mt: 2 }}
+        action={
+          <Button color="inherit" size="small" onClick={() => refetch()}>
+            Tentar novamente
+          </Button>
+        }
+      >
+        Erro ao carregar monitores log. Tente novamente.
+      </Alert>
     );
   }
 
@@ -54,15 +70,8 @@ export function DashboardPage() {
       {/* Cabeçalho */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Dashboard
+          Monitor Logs
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => navigate('/monitors/new')}
-        >
-          Novo Monitor
-        </Button>
       </Box>
 
       {/* Cards de Estatísticas */}
@@ -72,10 +81,10 @@ export function DashboardPage() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <MonitorHeart color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h6">Total de Monitores</Typography>
+                <Typography variant="h6">Total de Verificações</Typography>
               </Box>
-              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
-                {totalMonitors}
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                {totalMonitorsLog}
               </Typography>
             </CardContent>
           </Card>
@@ -87,8 +96,8 @@ export function DashboardPage() {
                 <PlayArrow color="success" sx={{ mr: 1 }} />
                 <Typography variant="h6">Ativos</Typography>
               </Box>
-              <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                {activeMonitors}
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                {logsUp}
               </Typography>
             </CardContent>
           </Card>
@@ -100,8 +109,8 @@ export function DashboardPage() {
                 <Schedule color="info" sx={{ mr: 1 }} />
                 <Typography variant="h6">Última Atualização</Typography>
               </Box>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                {lastUpdated ? lastUpdated.toLocaleDateString('pt-BR') : 'N/A'}
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                {lastChecked ? lastChecked.toLocaleDateString('pt-BR') : 'N/A'}
               </Typography>
             </CardContent>
           </Card>
@@ -110,48 +119,51 @@ export function DashboardPage() {
 
       {/* Lista de Monitores */}
       <Typography variant="h5" gutterBottom>
-        Monitores Recentes
+        Logs Recentes
       </Typography>
       <TableContainer component={Paper} sx={{ mb: 3 }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Nome</TableCell>
+              <TableCell>Status link</TableCell>
               <TableCell>URL</TableCell>
-              <TableCell>Periodicidade</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Ações</TableCell>
+              <TableCell>Status Code</TableCell>
+              <TableCell>Tempo (ms)</TableCell>
+              <TableCell>Data/Hora - Verificação</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {monitors && monitors.length > 0 ? (
-              monitors.slice(0, 5).map((monitor: Monitor) => (
-                <TableRow key={monitor.id}>
-                  <TableCell>{monitor.name}</TableCell>
-                  <TableCell>{monitor.url}</TableCell>
-                  <TableCell>{monitor.periodicityId}</TableCell>
+            {monitorsLog && monitorsLog.length > 0 ? (
+              monitorsLog.slice(0, 5).map((log) => (
+                <TableRow key={log.id}>
                   <TableCell>
                     <Chip
-                      label={monitor.url ? 'Ativo' : 'Inativo'}
-                      color={monitor.url ? 'success' : 'default'}
+                      label={log.isUp ? 'Operacional' : 'Fora do ar'}
+                      color={log.isUp ? 'info' : 'error'}
+                      size="small"
+                      sx={{ fontWeight: 'medium' }}
+                    />
+                  </TableCell>
+                  <TableCell>{log.url}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={log.isUp ? 'Online' : 'Offline'}
+                      color={log.isUp ? 'success' : 'error'}
                       size="small"
                     />
                   </TableCell>
+                  <TableCell>{log.statusCode || 'N/A'}</TableCell>
+                  <TableCell>{log.responseTimeMs || 'N/A'}</TableCell>
                   <TableCell>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => navigate(`/monitors/${monitor.id}/edit`)}
-                    >
-                      Editar
-                    </Button>
+                    {new Date(log.checkedAt).toLocaleString('pt-BR')}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  Nenhum monitor cadastrado.
+                <TableCell colSpan={6} align="center">
+                  Nenhum monitor log encontrado.
                 </TableCell>
               </TableRow>
             )}
@@ -159,10 +171,10 @@ export function DashboardPage() {
         </Table>
       </TableContainer>
 
-      {monitors && monitors.length > 5 && (
+      {monitorsLog && monitorsLog.length > 5 && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={() => navigate('/monitors')}>
-            Ver todos os monitores
+          <Button onClick={() => navigate('/logs')}>
+            Ver todos os monitores log
           </Button>
         </Box>
       )}
