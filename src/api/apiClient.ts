@@ -8,9 +8,15 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const authStorage = localStorage.getItem('auth-storage');
+ 
+  if (authStorage) {
+    const parsed = JSON.parse(authStorage);
+    const token = parsed.state?.token;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -22,7 +28,7 @@ apiClient.interceptors.response.use(
       const currentPath = window.location.pathname;
   
       if (!currentPath.includes('/login')) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('auth-storage');
 
         window.location.href = '/login?sessionExpired=true';
       }
