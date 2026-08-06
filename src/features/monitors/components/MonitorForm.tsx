@@ -1,10 +1,22 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { TextField, Button, Box } from '@mui/material';
+import { 
+  TextField, 
+  Button, 
+  Box, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem, 
+  FormHelperText,
+  Alert,
+  Skeleton 
+} from '@mui/material';
+import { usePeriodicitiesOptions } from '../../periodicities/hooks/usePeriodicitiesOptions';
+import { useAuthUser } from '../../../stores';
 
 const monitorSchema = z.object({
-  userId: z.number().min(1, 'Obrigatório'),
   periodicityId: z.number().min(1, 'Selecione uma periodicidade'),
   name: z.string().min(3, 'Mínimo 3 caracteres').max(100),
   description: z.string().optional(),
@@ -12,43 +24,94 @@ const monitorSchema = z.object({
 });
 
 type MonitorFormData = z.infer<typeof monitorSchema>;
+type MonitorPayload = MonitorFormData & { userId: number };
 
 interface MonitorFormProps {
   defaultValues?: Partial<MonitorFormData>;
-  onSubmit: (data: MonitorFormData) => void;
+  onSubmit: (data: MonitorPayload) => void;
   isLoading?: boolean;
 }
 
 export function MonitorForm({ defaultValues, onSubmit, isLoading }: MonitorFormProps) {
+  const loggedUser = useAuthUser();
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<MonitorFormData>({
     resolver: zodResolver(monitorSchema),
     defaultValues,
   });
 
+  const { 
+    data: periodicities,
+    isLoading: isLoadingPeriodicities, 
+    isError
+  } = usePeriodicitiesOptions();
+
+  const periodicityId = watch('periodicityId');
+  const handleFormSubmit = (data: MonitorFormData) => {
+    onSubmit({
+      ...data,
+      userId: loggedUser!.id,
+    });
+  };
+
+  if (isLoadingPeriodicities) {
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Skeleton variant="rectangular" height={56} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={56} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={56} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={56} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={56} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={36} sx={{ mt: 3 }} />
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        Erro ao carregar periodicidades. Tente novamente.
+      </Alert>
+    );
+  }
+
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 2 }}>
-      <TextField
-        fullWidth
-        label="ID do Usuário"
-        type="number"
-        margin="normal"
-        {...register('userId', { valueAsNumber: true })}
-        error={!!errors.userId}
-        helperText={errors.userId?.message}
-      />
-      <TextField
-        fullWidth
-        label="ID da Periodicidade"
-        type="number"
-        margin="normal"
-        {...register('periodicityId', { valueAsNumber: true })}
-        error={!!errors.periodicityId}
-        helperText={errors.periodicityId?.message}
-      />
+    <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} sx={{ mt: 2 }}>
+      <FormControl fullWidth margin="normal" error={!!errors.periodicityId}>
+        <InputLabel id="periodicity-select-label">Periodicidade</InputLabel>
+        <Select
+          labelId="periodicity-select-label"
+          label="Periodicidade"
+          value={periodicityId || ''}
+          onChange={(e) => setValue('periodicityId', Number(e.target.value))}
+          disabled={isLoading || isLoadingPeriodicities}
+          MenuProps={{
+            sx: {
+              '& .MuiPaper-root': {
+                maxHeight: 250,
+              },
+            },
+          }}
+        >
+          <MenuItem value="">
+            <em>Selecione uma periodicidade</em>
+          </MenuItem>
+          {periodicities?.map((periodicity) => (
+            <MenuItem key={periodicity.id} value={periodicity.id}>
+              {periodicity.time}
+            </MenuItem>
+          ))}
+        </Select>
+        {errors.periodicityId && (
+          <FormHelperText>{errors.periodicityId.message}</FormHelperText>
+        )}
+      </FormControl>
+
       <TextField
         fullWidth
         label="Nome"

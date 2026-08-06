@@ -1,22 +1,22 @@
 import { apiClient } from '../../../api/apiClient';
-import type { Monitor, InputMonitor } from '../models/monitor.model';
+import type { ApiResponse, PaginatedResponse } from '../../../shared/types/api';
+import type { Monitor, InputMonitor, MonitorApi } from '../models/monitor.model';
 
 export const monitorApi = {
-  // Buscar todos os monitores
-  // getAll: () => apiClient.get<Monitor[]>('/monitors'),
+  getAll: () => apiClient.get<Monitor[]>('/monitors'),
 
-   getAll: () => apiClient.get<Monitor[]>('/monitors-log'),
+  getAllPaginated: (page: number = 1, limit: number = 10) => { 
+    return apiClient.get<PaginatedResponse<MonitorApi>>('/monitors-paginated', {
+      params: { page, limit }
+    });
+  }, 
 
-  // Buscar um monitor por ID
   getById: (id: number) => apiClient.get<Monitor>(`/monitors/${id}`),
 
-  // Criar um novo monitor
-  create: (data: InputMonitor) => apiClient.post<Monitor>('/monitor', data),
+  create: (data: InputMonitor) => apiClient.post<ApiResponse<MonitorApi>>('/monitor', data),
 
-  // Atualizar um monitor existente (PATCH)
   update: (id: number, data: Partial<InputMonitor>) =>
-    apiClient.patch<Monitor>(`/monitors/${id}`, data),
+    apiClient.put<ApiResponse<MonitorApi>>(`/monitor/${id}`, data),
 
-  // Excluir um monitor
-  delete: (id: number) => apiClient.delete<void>(`/monitors/${id}`),
+  delete: (id: number) => apiClient.delete<void>(`/monitor/${id}`),
 };

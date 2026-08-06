@@ -10,12 +10,12 @@ export function MonitorFormPage() {
   const isEdit = !!id;
   const navigate = useNavigate();
 
-  // Busca a lista de monitores (ou poderia usar um hook específico getById)
-  const { data: monitors, isLoading } = useMonitors();
+  const { data, isLoading } = useMonitors(1, 100);
   const { createMonitor, updateMonitor } = useMonitorMutations();
+  const items = data?.items ?? [];
 
   const defaultValues = isEdit
-    ? monitors?.find((m) => m.id === Number(id))
+    ? items.find((item) => item.id === Number(id))
     : undefined;
 
   if (isLoading && isEdit) {
