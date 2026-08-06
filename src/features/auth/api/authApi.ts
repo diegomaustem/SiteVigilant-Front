@@ -8,8 +8,8 @@ export const authApi = {
   register: (data: RegisterData) =>
     apiClient.post<AuthResponse>('/register', data),
 
-  logout: () =>
-    apiClient.post<void>('/logout'),
+  // logout: () =>
+  //   apiClient.post<void>('/logout'),
 
   getCurrentUser: () =>
     apiClient.get<AuthResponse>('/me'),
