@@ -2,7 +2,10 @@ import { apiClient } from '../../../api/apiClient';
 import type { InputPeriodicity, PeriodicityApi } from '../models/periodicity.model';
 import type { ApiResponse, PaginatedResponse } from '../../../shared/types/api';
 export const periodicityApi = {
-    getAll: (page: number = 1, limit: number = 10) => { 
+
+    getAll: () => apiClient.get<ApiResponse<PeriodicityApi[]>>('/periodicities'),
+
+    getAllPaginated: (page: number = 1, limit: number = 10) => { 
         return apiClient.get<PaginatedResponse<PeriodicityApi>>('/periodicities-paginated', {
             params: { page, limit }
         });

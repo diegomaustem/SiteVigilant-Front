@@ -17,23 +17,23 @@ type PeriodicitiesResponse = {
 };
 
 export function usePeriodicities(
-    page: number = 1,
-    limit: number = 10
+  page: number = 1,
+  limit: number = 10
 ) {
     return useQuery<PeriodicitiesResponse>({
-        queryKey: [PERIODICITIES_QUERY_KEY, page, limit],
-        queryFn: async () => {
-            const response = await periodicityApi.getAll(page, limit);
-            const { data, meta } = response.data;
+    queryKey: [PERIODICITIES_QUERY_KEY, page, limit],
+    queryFn: async () => {
+      const response = await periodicityApi.getAllPaginated(page, limit);
+      const { data, meta } = response.data;
 
-         const items = data.map((item: PeriodicityApi): Periodicity => ({
-            id: item.id,
-            time: item.time,
-            status: item.status,
-            createdAt: item.created_at,
-            updatedAt: item.updated_at,
-        }));
-        return { items, meta };
+      const items = data.map((item: PeriodicityApi): Periodicity => ({
+        id: item.id,
+        time: item.time,
+        status: item.status,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      }));
+      return { items, meta };
     },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,

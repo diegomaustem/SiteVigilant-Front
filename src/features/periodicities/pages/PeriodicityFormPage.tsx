@@ -6,20 +6,17 @@ import type { InputPeriodicity } from '../models/periodicity.model';
 import { Box, Typography, CircularProgress } from '@mui/material';
 
 export function PeriodcityFormPage() {
-    const { id } = useParams<{ id: string }>();
-    const isEdit = !!id;
-    const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEdit = !!id;
+  const navigate = useNavigate();
 
-    const { data, isLoading } = usePeriodicities(1, 100);
-    const { createPeriodicity, updatePeriodicity, deletePeriodicity } = usePeriodicityMutations();
+  const { data, isLoading } = usePeriodicities(1, 100);
+  const { createPeriodicity, updatePeriodicity, deletePeriodicity } = usePeriodicityMutations();
 
-    // Extrai os itens da resposta paginada
-    const items = data?.items ?? [];
-
-    // Encontra o item pelo ID (se estiver editando)
-    const defaultValues = isEdit
-        ? items.find((item) => item.id === Number(id))
-        : undefined;
+  const items = data?.items ?? [];
+  const defaultValues = isEdit
+    ? items.find((item) => item.id === Number(id))
+    : undefined;
 
   if (isLoading && isEdit) {
     return (
@@ -33,9 +30,7 @@ export function PeriodcityFormPage() {
     if (isEdit) {
       updatePeriodicity.mutate(
         { id: Number(id), data },
-        {
-          onSuccess: () => navigate('/periodicities'),
-        }
+        { onSuccess: () => navigate('/periodicities') }
       );
     } else {
       createPeriodicity.mutate(data, {
