@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import { useAuthMutations } from '../hooks/useAuthMutations';
 import type { LoginCredentials } from '../models/auth.model';
 import logo from '/img/logo.png';
+import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function LoginPage() {
   const toastShown = useRef(false);
@@ -23,7 +24,7 @@ export function LoginPage() {
   const handleSubmit = (data: LoginCredentials) => {
     loginMutation.mutate(data);
   };
-
+  
   return (
     <AuthLayout title="">
        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
@@ -39,7 +40,7 @@ export function LoginPage() {
       <LoginForm 
         onSubmit={handleSubmit} 
         isLoading={loginMutation.isPending} 
-        error={loginMutation.error?.message} 
+        error={loginMutation.error ? getErrorMessage(loginMutation.error) : null} 
       />
       <Typography variant="body2" sx={{ mt: 2 }}>
         Não tem uma conta?{' '}

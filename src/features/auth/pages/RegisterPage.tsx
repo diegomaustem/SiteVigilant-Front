@@ -4,6 +4,7 @@ import { RegisterForm } from '../components/RegisterForm';
 import { Typography, Link, Box } from '@mui/material';
 import { useAuthMutations } from '../hooks/useAuthMutations';
 import logo from '/img/logo.png';
+import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function RegisterPage() {
   const { registerMutation } = useAuthMutations();
@@ -27,7 +28,7 @@ export function RegisterPage() {
       <RegisterForm 
         onSubmit={handleSubmit} 
         isLoading={registerMutation.isPending} 
-        error={registerMutation.error?.message} 
+        error={registerMutation.error ? getErrorMessage(registerMutation.error) : null} 
       />
       <Typography variant="body2" sx={{ mt: 2 }}>
         Já tem uma conta?{' '}
