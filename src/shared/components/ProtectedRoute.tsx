@@ -1,13 +1,27 @@
+// src/shared/components/ProtectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
+import { useIsAuthenticated, useAuthLoading } from '../../stores';
+import { CircularProgress, Box } from '@mui/material';
+import { useEffect } from 'react';
 
 export function ProtectedRoute() {
-  const token = localStorage.getItem('token');
+  const isAuthenticated = useIsAuthenticated();
+  const isLoading = useAuthLoading();
 
-  // Se não houver token, redireciona para a página de login
-  if (!token) {
+  useEffect(() => {
+  }, [isAuthenticated, isLoading]);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+    if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Se houver token, renderiza o conteúdo da rota (Outlet ou children)
-  return <Outlet />;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 }

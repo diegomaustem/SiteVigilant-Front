@@ -1,5 +1,5 @@
 import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { Dashboard, MonitorHeart, AddCircle, Logout, GroupRounded } from '@mui/icons-material';
+import { Dashboard, MonitorHeart, Logout, GroupRounded, ReceiptRounded } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthMutations } from '../../features/auth/hooks/useAuthMutations';
 
@@ -11,8 +11,8 @@ export function SidebarMenu() {
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Monitores', icon: <MonitorHeart />, path: '/monitors' },
-    { text: 'Novo Monitor', icon: <AddCircle />, path: '/monitors/new' },
-    { text: 'Usuários', icon: <GroupRounded />, path: '/users' }
+    { text: 'Periodicidades', icon: <ReceiptRounded />, path: '/periodicities' },
+    { text: 'Usuários', icon: <GroupRounded />, path: '/users' },
   ];
 
   const handleLogout = () => {
