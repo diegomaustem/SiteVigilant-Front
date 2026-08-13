@@ -10,6 +10,7 @@ import { MonitorRoutes } from './features/monitors/routes';
 import { ProtectedRoute } from './shared/components/ProtectedRoute';
 import { CssBaseline } from '@mui/material';
 import { PeriodicityRoutes } from './features/periodicities/routes';
+import { UserRoutes } from './features/users/routes';
 
 import { useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
@@ -54,6 +55,10 @@ function App() {
 
               <Route path="/periodicities/*" element={<DashboardLayout />}>
                 <Route path="*" element={<PeriodicityRoutes />} />
+              </Route>
+
+              <Route path="/users/*" element={<DashboardLayout />}>
+                <Route path="*" element={<UserRoutes />} />
               </Route>
             </Route>
           </Routes>
